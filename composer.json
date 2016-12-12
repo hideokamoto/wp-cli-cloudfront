@@ -1,0 +1,13 @@
+{
+    "name": "hideokamoto/wp-cloudfront",
+    "description": "WP-CLI commands for the AWS CloudFront",
+    "type": "wp-cli-package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hidetaka Okamoto",
+            "email": "kokkoku214@gmail.com"
+        }
+    ],
+    "require": {}
+}
