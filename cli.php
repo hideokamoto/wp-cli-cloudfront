@@ -32,9 +32,8 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
     /**
      * Set default Option params
      *
-     *
      **/
-    private function _set_option_params( $options ) {
+    private function _set_option_params( array $options ) {
         if ( ! isset( $options['profile'] ) ) {
             $options['profile'] = 'default';
         }
@@ -44,15 +43,51 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
         if ( ! isset( $options['secret_key'] ) ) {
             $options['secret_key'] = false;
         }
+        if ( ! isset( $options['format'] ) ) {
+            $options['format'] = 'json';
+        }
         return $options;
     }
 
     /**
-     * Create CloudFront Distribution
+     * List CloudFront Distributions
      *
+     * ##OPTIONS
+     * [--profile=<profile>]
+     * : AWS-CLI's profile name
+     *
+     * [--acccess_key=<access_key>]
+     * : IAM Access Key
+     *
+     * [--secret_key=<secret_key>]
+     * : IAM Secret Key
+     *
+     * [--format=<format>]
+     * : Render results in a specific format (Now only YAML support)
      * @when before_wp_load
      */
-    function create( $args, $assoc_args ) {
+    function list( $args, $assoc_args ) {
+        $options = $this->_set_option_params( $assoc_args );
+        $this->_create_client( $options['profile'], $options['access_key'], $options['secret_key'] );
+        $result = $this->client->listDistributions();
+        WP_CLI\Utils\format_items( 'yaml', $result->get('DistributionList'), array() );
+    }
+
+    /**
+     * Generate CloudFront Distribution Config
+     *
+     * ##OPTIONS
+     * [--profile=<profile>]
+     * : AWS-CLI's profile name
+     *
+     * [--acccess_key=<access_key>]
+     * : IAM Access Key
+     *
+     * [--secret_key=<secret_key>]
+     * : IAM Secret Key
+     * @when before_wp_load
+     */
+    function generate_config( $args, $assoc_args ) {
         $options = $this->_set_option_params( $assoc_args );
         $this->_create_client( $options['profile'], $options['access_key'], $options['secret_key'] );
         $result = $this->client->listDistributions();
