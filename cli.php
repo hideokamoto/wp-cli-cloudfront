@@ -77,6 +77,12 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
      * Generate CloudFront Distribution Config
      *
      * ##OPTIONS
+	 * [--domain=<domain>]
+	 * : Your website domain
+	 *
+	 * [--origin=<origin>]
+	 * : Your origin webserver address
+	 *
      * [--profile=<profile>]
      * : AWS-CLI's profile name
      *
@@ -85,16 +91,42 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
      *
      * [--secret_key=<secret_key>]
      * : IAM Secret Key
-     * @when before_wp_load
+     * @when after_wp_load
      */
     function generate_config( $args, $assoc_args ) {
-        $options = $this->_set_option_params( $assoc_args );
-        $this->_create_client( $options['profile'], $options['access_key'], $options['secret_key'] );
-        $result = $this->client->listDistributions();
-        var_dump($result);
-        return;
-        $domain = cli\confirm( 'Do you want to overwrite', false );
-        echo $domain;
+		if ( isset( $assoc_args['domain'] ) ) {
+			$domain = $assoc_args['domain'];
+		} else {
+			$domain = trim( cli\prompt(
+				'Your website Domain',
+				$default = false,
+				$marker = ': ',
+				$hide = false
+			) );
+		}
+		$domain = esc_attr( $domain );
+
+		if ( isset( $assoc_args['origin'] ) ) {
+			$origin = $assoc_args['origin'];
+		} else {
+			$origin = trim( cli\prompt(
+				'Your origin webserver address',
+				$default = false,
+				$marker = ': ',
+				$hide = false
+			) );
+		}
+		$origin = esc_attr( $origin );
+		$result = wp_remote_get('https://raw.githubusercontent.com/amimoto-ami/create-cf-dist-settings/master/cloudfront-input.json');
+		if ( is_wp_error( $result ) ) {
+			return;
+		}
+		$config = $result['body'];
+		$config = preg_replace( '/example.com/', $domain, $config );
+		$config = preg_replace( '/%origin-id%/', $domain, $config );
+		$config = preg_replace( '/origin.example.com/', $origin, $config );
+		$config = preg_replace( '/%caller-reference%/', time(), $config );
+		echo $config;
     }
 
     /**
