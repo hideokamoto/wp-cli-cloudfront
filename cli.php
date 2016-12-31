@@ -165,17 +165,21 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
      * [--profile=<profile>]
      * : AWS-CLI's profile name
      *
-     * [--acccess_key=<access_key>]
+     * [--access_key=<access_key>]
      * : IAM Access Key
      *
      * [--secret_key=<secret_key>]
      * : IAM Secret Key
+     *
      * @when after_wp_load
      */
     function generate( $args, $assoc_args ) {
+        $options = $this->_set_option_params( $assoc_args );
+        $this->_create_client( $options['profile'], $options['access_key'], $options['secret_key'] );
         $config = $this->generate_distribution_config( $args, $assoc_args );
         echo $config;
     }
+
     /**
      * Generate CloudFront Distribution Config
      *
