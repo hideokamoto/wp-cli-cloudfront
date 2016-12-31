@@ -113,26 +113,10 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
     }
 
     /**
-     * Generate CloudFront Distribution Config
      *
-     * ##OPTIONS
-     * [--domain=<domain>]
-     * : Your website domain
      *
-     * [--origin=<origin>]
-     * : Your origin webserver address
-     *
-     * [--profile=<profile>]
-     * : AWS-CLI's profile name
-     *
-     * [--acccess_key=<access_key>]
-     * : IAM Access Key
-     *
-     * [--secret_key=<secret_key>]
-     * : IAM Secret Key
-     * @when after_wp_load
-     */
-    function generate_config( $args, $assoc_args ) {
+     **/
+    private function generate_distribution_config( $args, $assoc_args ) {
         if ( isset( $assoc_args['domain'] ) ) {
             $domain = $assoc_args['domain'];
         } else {
@@ -165,6 +149,47 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
         $config = preg_replace( '/%origin-id%/', $domain, $config );
         $config = preg_replace( '/origin.example.com/', $origin, $config );
         $config = preg_replace( '/%caller-reference%/', time(), $config );
+        return $config;
+    }
+
+    /**
+     * Generate CloudFront Distribution
+     *
+     * ##OPTIONS
+     * [--domain=<domain>]
+     * : Your website domain
+     *
+     * [--origin=<origin>]
+     * : Your origin webserver address
+     *
+     * [--profile=<profile>]
+     * : AWS-CLI's profile name
+     *
+     * [--acccess_key=<access_key>]
+     * : IAM Access Key
+     *
+     * [--secret_key=<secret_key>]
+     * : IAM Secret Key
+     * @when after_wp_load
+     */
+    function generate( $args, $assoc_args ) {
+        $config = $this->generate_distribution_config( $args, $assoc_args );
+        echo $config;
+    }
+    /**
+     * Generate CloudFront Distribution Config
+     *
+     * ##OPTIONS
+     * [--domain=<domain>]
+     * : Your website domain
+     *
+     * [--origin=<origin>]
+     * : Your origin webserver address
+     *
+     * @when after_wp_load
+     */
+    function generate_config( $args, $assoc_args ) {
+        $config = $this->generate_distribution_config( $args, $assoc_args );
         echo $config;
     }
 
