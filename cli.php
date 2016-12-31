@@ -84,14 +84,15 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
      * : IAM Secret Key
      *
      * [--format=<format>]
-     * : Render results in a specific format (Now only YAML support)
+     * : Render results in a specific format (Now only JSON support)
      * @when before_wp_load
      */
     function list( $args, $assoc_args ) {
         $options = $this->_set_option_params( $assoc_args );
         $this->_create_client( $options['profile'], $options['access_key'], $options['secret_key'] );
         $result = $this->client->listDistributions();
-        WP_CLI\Utils\format_items( 'yaml', $result->get('DistributionList'), array() );
+        //@TODO Support another format like YAML / table / csv and more
+        //echo json_encode($result->get('DistributionList'));
     }
 
     /**
