@@ -3,6 +3,7 @@
 
 ## Requires
 * WP-CLI 0.23 or later
+* PHP 7 or later
 * AWS account(IAM or AWS-CLI credentials)
 
 ## Getting Started
