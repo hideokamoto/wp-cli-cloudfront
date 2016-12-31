@@ -91,8 +91,8 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
         $options = $this->_set_option_params( $assoc_args );
         $this->_create_client( $options['profile'], $options['access_key'], $options['secret_key'] );
         $result = $this->client->listDistributions();
+        echo json_encode($result->get('DistributionList'));
         //@TODO Support another format like YAML / table / csv and more
-        //echo json_encode($result->get('DistributionList'));
     }
 
     /**
@@ -145,9 +145,9 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
             WP_CLI::error( $result->get_error_message() );
         }
         $config = $result['body'];
+        $config = preg_replace( '/origin.example.com/', $origin, $config );
         $config = preg_replace( '/example.com/', $domain, $config );
         $config = preg_replace( '/%origin-id%/', $domain, $config );
-        $config = preg_replace( '/origin.example.com/', $origin, $config );
         $config = preg_replace( '/%caller-reference%/', time(), $config );
         return $config;
     }
@@ -177,7 +177,18 @@ class WP_CLI_CloudFront extends WP_CLI_Command {
         $options = $this->_set_option_params( $assoc_args );
         $this->_create_client( $options['profile'], $options['access_key'], $options['secret_key'] );
         $config = $this->generate_distribution_config( $args, $assoc_args );
-        echo $config;
+        $config = json_decode( $config, true );
+        try {
+            $result = $this->client->createDistribution( $config );
+            WP_CLI::success($result);
+        } catch (Exception $e) {
+            WP_CLI::error_multi_line( array(
+                'Fail to create CloudFront Distribution',
+                $e->getMessage()
+                )
+            );
+            exit;
+        }
     }
 
     /**
